@@ -21,3 +21,6 @@ start the server with
 ```
 npx vite
 ```
+
+
+Don't push to main, open your own branch please. Merge with pull requests.
