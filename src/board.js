@@ -43,6 +43,26 @@ export class Board {
                         );
                         plate.position.set(j, 0, posZ - 0.35);
                         scene.add(plate);
+                    }else if (entry === -5) {
+                        // leaver. rectangle at 45 degrees
+                        let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
+                        geometry.rotateY(Math.PI / 4);
+                        let plate = new THREE.Mesh(
+                            geometry,
+                            new THREE.MeshPhongMaterial({ color: 0xf0e0e0 })
+                        );
+                        plate.position.set(j + 0.2, 0, posZ - 0.35);
+                        scene.add(plate);
+                    }else if (entry === -6) {
+                        // leaver. rectangle at 45 degrees
+                        let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
+                        geometry.rotateY(-Math.PI / 4);
+                        let plate = new THREE.Mesh(
+                            geometry,
+                            new THREE.MeshPhongMaterial({ color: 0xe0e0f0 })
+                        );
+                        plate.position.set(j - 0.2, 0, posZ - 0.35);
+                        scene.add(plate);
                     }
                 }
             }
