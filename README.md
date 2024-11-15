@@ -1,4 +1,4 @@
-# FireBoyWaterGirl
+# Cheese Burger Assembly
 
 Building out 2.5D game using Three.js
 
