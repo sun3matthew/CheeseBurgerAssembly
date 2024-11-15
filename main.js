@@ -15,9 +15,16 @@ document.addEventListener('keyup', onKeyUp, false);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 0);
 controls.enabled = true;
+controls.enableZoom = false;
+controls.enableRotate = false;
+controls.enablePan = false;
+
 controls.minDistance = 10;
 controls.maxDistance = 50;
-// 2.5D game. Derived from fire boy and water girl. 
+
+// 0 = air (walkable)
+// 1 = solid block (floor, wall, or ceiling)
+// 2
 let playerGrid = [
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -43,8 +50,6 @@ let playerGrid = [
 	[1, 0, 0, -1, 0, 1, 3, 3, 3, 3, 1, 1, 1, 1, 4, 4, 4, 4, 1, 0, -2, 0, 0, 1],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
-
-
 
 // let light = new THREE.AmbientLight(0xffffff);
 // scene.add(light);
@@ -80,6 +85,8 @@ for (let i = 0; i < textures.length; i++) {
 	textures[i].colorSpace = THREE.SRGBColorSpace;
 }
 
+
+// Create map
 for (let i = 0; i < playerGrid.length; i++) {
 	for (let j = 0; j < playerGrid[i].length; j++) {
 		if (playerGrid[i][j] > 0) {
@@ -178,51 +185,130 @@ ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.5;
 scene.add(ground);
 
-camera.position.z = 5;
+
+camera.position.set(12, 15, 11);
+camera.lookAt(new THREE.Vector3(12, 0, 11));
+
+
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+
+// Define requested positions for collision detection
+let req_x1 = player1.position.x;
+let req_x2 = player2.position.x;
+let req_z1 = player1.position.z;
+let req_z2 = player2.position.z;
 
 function onKeyDown(event) {
-	// wasd
-	if (event.keyCode === 87) {
-		cube.position.z -= 0.1;
-	}
-	if (event.keyCode === 83) {
-		cube.position.z += 0.1;
-	}
+	const STEP_SIZE = 0.1;
+
+	// A (player1 move left)
 	if (event.keyCode === 65) {
-		cube.position.x -= 0.1;
+		req_x1 -= STEP_SIZE;
 	}
+
+	// D (player1 move right)
 	if (event.keyCode === 68) {
-		cube.position.x += 0.1;
+		req_x1 += STEP_SIZE;
 	}
+
+	// Left arrow (player2 move left)
+	if (event.keyCode === 37) {
+        req_x2 -= STEP_SIZE;
+    }
+
+	// Right arrow (player2 move right)
+    if (event.keyCode === 39) {
+        req_x2 += STEP_SIZE;
+    }
 }
+
+// Define jump states and velocities for each player
+let jump1 = false;
+let jump2 = false;
+let velocity1 = 0;
+let velocity2 = 0;
+let gravity = -0.2;
 
 function onKeyUp(event) {
-	if (event.keyCode === 32 && !jump) {
-		console.log('space');
-		jump = true;
-		velocity = 1;
-	}
+    // W (player1 jump)
+    if (event.keyCode === 87 && !jump1) {
+        console.log('player1 jump');
+        jump1 = true;
+        velocity1 = 1;
+    }
+
+    // Up arrow (player2 jump)
+    if (event.keyCode === 38 && !jump2) {
+        console.log('player2 jump');
+        jump2 = true;
+        velocity2 = 1;
+    }
 }
 
-let gravity = -0.08;
-let velocity = 0;
-let jump = false;
-
 function animate() {
+    requestAnimationFrame(animate);
 
-	if (jump) {
-		velocity += gravity;
-		cube.position.y += velocity;
-		if (cube.position.y <= 0) {
-			cube.position.y = 0;
-			jump = false;
-			velocity = 0;
+    const playerGridHeight = playerGrid.length;
+    const playerGridWidth = playerGrid[0].length;
+
+	// Updates position while checking for collisions
+	function updatePosition(player, curr_x, curr_z, req_x, req_z) {
+		let round_x = Math.round(req_x);
+		let round_z = Math.round(req_z);
+		
+		// Within x-boundaries, z-boundaries, and no block present in grid here
+        if (
+            round_x >= -1 && round_x < playerGridWidth &&	
+            round_z >= -1 && round_z < playerGridHeight &&
+            playerGrid[Math.round(round_z)][Math.round(round_x)] === 0
+        ) {
+            player.position.x = req_x;
+            player.position.z = req_z;
+        }
+	}
+	updatePosition(player1, player1.position.x, player1.position.z, req_x1, req_z1);
+    updatePosition(player2, player2.position.x, player2.position.z, req_x2, req_z2);
+	req_x1 = player1.position.x;
+	req_x2 = player2.position.x;
+	req_z1 = player1.position.z;
+	req_z2 = player2.position.z;
+
+    // Update player1 jump
+    if (jump1) {
+        player1.position.z += velocity1;
+		velocity1 += gravity;
+		if (player1.position.z <= 0) {
+			player1.position.z = 0;
+			jump1 = false;
+			velocity1 = 0;
 		}
+    }
+
+    // Update player2 jump
+    if (jump2) {
+        player2.position.z += velocity2;
+		velocity2 += gravity;
+		if (player2.position.z <= 0) {
+			player2.position.z = 0;
+			jump2 = false;
+			velocity2 = 0;
+    	}
 	}
 
-	// cube.rotation.x += 0.01;
-	// cube.rotation.y += 0.01;
+	function checkOutOfBounds(player, playerName) {
+		if (
+			player.position.x < 0 || player.position.x >= playerGridWidth ||
+			player.position.z < 0 || player.position.z >= playerGridHeight
+		) {
+			throw new Error(`${playerName} fell out of bounds: (${player.position.x.toFixed(2)}, ${player.position.z.toFixed(2)})`);
+		}
+	}
+	
+	checkOutOfBounds(player1, "Player1");
+	checkOutOfBounds(player2, "Player2");
 
-	renderer.render( scene, camera );
+	console.log('player1: x=%d, z=%d\nplayer2: x=%d, z=%d', player1.position.x, player1.position.z, player2.position.x, player2.position.z);
 
+	renderer.render(scene, camera);
 }
