@@ -87,6 +87,7 @@ for (let i = 0; i < textures.length; i++) {
 
 
 // Create map
+// 0, 0 is top left
 for (let i = 0; i < playerGrid.length; i++) {
 	for (let j = 0; j < playerGrid[i].length; j++) {
 		if (playerGrid[i][j] > 0) {
@@ -200,115 +201,128 @@ let req_z1 = player1.position.z;
 let req_z2 = player2.position.z;
 
 function onKeyDown(event) {
-	const STEP_SIZE = 0.1;
+    const STEP_SIZE = 0.4;
 
-	// A (player1 move left)
-	if (event.keyCode === 65) {
-		req_x1 -= STEP_SIZE;
-	}
+    // A (player1 move left)
+    if (event.keyCode === 65) {
+        req_x1 -= STEP_SIZE;
+    }
 
-	// D (player1 move right)
-	if (event.keyCode === 68) {
-		req_x1 += STEP_SIZE;
-	}
+    // D (player1 move right)
+    if (event.keyCode === 68) {
+        req_x1 += STEP_SIZE;
+    }
 
-	// Left arrow (player2 move left)
-	if (event.keyCode === 37) {
+    // Left arrow (player2 move left)
+    if (event.keyCode === 37) {
         req_x2 -= STEP_SIZE;
     }
 
-	// Right arrow (player2 move right)
+    // Right arrow (player2 move right)
     if (event.keyCode === 39) {
         req_x2 += STEP_SIZE;
     }
 }
 
 // Define jump states and velocities for each player
+const gravity = 0.05;
+const delta_t = 0.5;
+const jump_v_0 = -0.9;
+
 let jump1 = false;
 let jump2 = false;
 let velocity1 = 0;
 let velocity2 = 0;
-let gravity = -0.2;
 
 function onKeyUp(event) {
     // W (player1 jump)
     if (event.keyCode === 87 && !jump1) {
-        console.log('player1 jump');
+        //console.log('player1 jump');
         jump1 = true;
-        velocity1 = 1;
+        velocity1 = jump_v_0;
     }
 
     // Up arrow (player2 jump)
     if (event.keyCode === 38 && !jump2) {
-        console.log('player2 jump');
+        //console.log('player2 jump');
         jump2 = true;
-        velocity2 = 1;
+        velocity2 = jump_v_0;
     }
 }
 
-function animate() {
-    requestAnimationFrame(animate);
 
-    const playerGridHeight = playerGrid.length;
-    const playerGridWidth = playerGrid[0].length;
+const playerGridHeight = playerGrid.length;
+const playerGridWidth = playerGrid[0].length;
 
-	// Updates position while checking for collisions
-	function updatePosition(player, curr_x, curr_z, req_x, req_z) {
-		let round_x = Math.round(req_x);
-		let round_z = Math.round(req_z);
-		
-		// Within x-boundaries, z-boundaries, and no block present in grid here
-        if (
-            round_x >= -1 && round_x < playerGridWidth &&	
-            round_z >= -1 && round_z < playerGridHeight &&
-            playerGrid[Math.round(round_z)][Math.round(round_x)] === 0
-        ) {
-            player.position.x = req_x;
-            player.position.z = req_z;
-        }
-	}
-	updatePosition(player1, player1.position.x, player1.position.z, req_x1, req_z1);
-    updatePosition(player2, player2.position.x, player2.position.z, req_x2, req_z2);
-	req_x1 = player1.position.x;
-	req_x2 = player2.position.x;
-	req_z1 = player1.position.z;
-	req_z2 = player2.position.z;
-
-    // Update player1 jump
-    if (jump1) {
-        player1.position.z += velocity1;
-		velocity1 += gravity;
-		if (player1.position.z <= 0) {
-			player1.position.z = 0;
-			jump1 = false;
-			velocity1 = 0;
-		}
-    }
-
-    // Update player2 jump
-    if (jump2) {
-        player2.position.z += velocity2;
-		velocity2 += gravity;
-		if (player2.position.z <= 0) {
-			player2.position.z = 0;
-			jump2 = false;
-			velocity2 = 0;
-    	}
-	}
-
-	function checkOutOfBounds(player, playerName) {
-		if (
-			player.position.x < 0 || player.position.x >= playerGridWidth ||
-			player.position.z < 0 || player.position.z >= playerGridHeight
-		) {
-			throw new Error(`${playerName} fell out of bounds: (${player.position.x.toFixed(2)}, ${player.position.z.toFixed(2)})`);
+// Update player jump based on current velocity and gravity
+function updateJump(req_z, velocity, jump) {
+	if (jump) {
+		req_z += velocity*delta_t;// + 0.5*gravity*delta_t**2;
+		velocity += gravity;
+		if (req_z >= playerGridHeight) { // "grounded"
+			req_z = 0;
+			jump = false;
+			velocity = 0;
 		}
 	}
+	return { req_z, velocity, jump };
+}
+
+// Update position while checking for collisions
+function updatePosition(player, req_x, req_z) {
 	
-	checkOutOfBounds(player1, "Player1");
-	checkOutOfBounds(player2, "Player2");
+	const round_x = Math.floor(req_x);
+	const round_z = Math.floor(req_z);
 
-	console.log('player1: x=%d, z=%d\nplayer2: x=%d, z=%d', player1.position.x, player1.position.z, player2.position.x, player2.position.z);
+	// Check if within grid boundaries and cell is empty
+	if (
+		round_x >= 0 && round_x < playerGridWidth &&
+		round_z >= 0 && round_z < playerGridHeight &&
+		playerGrid[round_z][round_x] === 0
+	) {
+	player.position.x = req_x;
+	player.position.z = req_z;
+	}
+}
 
-	renderer.render(scene, camera);
+// Check if players are out of bounds
+function checkOutOfBounds(player, playerName) {
+	if (
+		player.position.x < 0 || player.position.x >= playerGridWidth ||
+		player.position.z < 0 || player.position.z >= playerGridHeight
+	) {
+		throw new Error(`${playerName} fell out of bounds: (${player.position.x.toFixed(2)}, ${player.position.z.toFixed(2)})`);
+	}
+}
+
+function animate() {
+    // Update jump for both players
+    let result1 = updateJump(req_z1, velocity1, jump1);
+    req_z1 = result1.req_z;
+    velocity1 = result1.velocity;
+    jump1 = result1.jump;
+
+    let result2 = updateJump(req_z2, velocity2, jump2);
+    req_z2 = result2.req_z;
+    velocity2 = result2.velocity;
+    jump2 = result2.jump;
+
+    // Update each player’s position
+    updatePosition(player1, req_x1, req_z1);
+    updatePosition(player2, req_x2, req_z2);
+
+    // Sync requested positions with actual positions
+    req_x1 = player1.position.x;
+    req_x2 = player2.position.x;
+    req_z1 = player1.position.z;
+    req_z2 = player2.position.z;
+
+    checkOutOfBounds(player1, "Player1");
+    checkOutOfBounds(player2, "Player2");
+
+    // Logging player positions
+    //console.log(`Player1: x=${player1.position.x}, z=${player1.position.z}`);
+    //console.log(`Player2: x=${player2.position.x}, z=${player2.position.z}`);
+
+    renderer.render(scene, camera);
 }
