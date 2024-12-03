@@ -26,10 +26,11 @@ export class Player{
     hasCollided(offsetX, offsetY){
         let surroundingTiles = this.board.getTilesAroundPlayer(this);
         let collided = false;
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
+
         for (let i = 0; i < surroundingTiles.length; i++) {
             let tile = surroundingTiles[i];
             let tileBoundingBox = tile.getBoundingBox();
-            let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
             if (Collision.AABBIntersect(playerBoundingBox, tileBoundingBox)) {
                 collided = true;
                 break;
@@ -39,12 +40,23 @@ export class Player{
         // check player collision with other player
         let otherPlayer = this.playerNumber === 1 ? this.board.player2 : this.board.player1;
         let otherPlayerBoundingBox = otherPlayer.getBoundingBox();
-        let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
         if (Collision.AABBIntersect(playerBoundingBox, otherPlayerBoundingBox)) {
             collided = true;
         }
 
         return collided;
+    }
+
+    groundUpperPosition(offsetY){
+        let surroundingTiles = this.board.getTilesAroundPlayer(this);
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y + offsetY);
+
+        for (let i = 0; i < surroundingTiles.length; i++) {
+            let tile = surroundingTiles[i];
+            let tileBoundingBox = tile.getBoundingBox();
+            if (Collision.AABBIntersect(playerBoundingBox, tileBoundingBox))
+                return tileBoundingBox.y + tileBoundingBox.height;
+        }
     }
 
     move(deltaX, deltaY){
@@ -67,6 +79,10 @@ export class Player{
         // check if player is on the ground
         if (this.velY < 0) {
             if (hasCollided) {
+                let groundUpperPosition = this.groundUpperPosition(this.velY);
+                if (groundUpperPosition !== undefined)
+                    this.updatePosition(this.x, groundUpperPosition + Player.playerHeight / 2);
+                
                 this.velY = 0;
                 this.grounded = true;
             }else{
