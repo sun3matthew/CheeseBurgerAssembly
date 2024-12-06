@@ -1,15 +1,42 @@
-import { Input } from './input';
-import { TextureManager } from './textureManager';
-import { ThreeManager } from './threeManager';
+import { Input } from './managers/Input';
+import { TextureManager } from './managers/textureManager';
+import { ThreeManager } from './managers/threeManager';
 import { Board } from './board';
+import { Levels } from './managers/levels';
 
 Input.Init();
 TextureManager.Init();
 
-const threeManager = new ThreeManager(update);
-const board = new Board(threeManager.scene, 1);
+let threeManager;
+let board;
+
+let level = 0;
+let totalLevels = 2;
+
+async function startGame() {
+	await Levels.loadLevels(totalLevels);
+	
+	threeManager = new ThreeManager(update);
+	nextLevel();
+}
+
+function nextLevel() {
+	threeManager.createEmptyBoard();
+	
+	level++;
+	console.log("Level", level);
+	board = new Board(threeManager.scene, level);
+
+	threeManager.start();
+}
+
 
 function update() {
+	if (Input.getKeyDown("Enter")) {
+		nextLevel();
+		return;
+	}
+
 	if (Input.getKey("ArrowLeft"))
 		board.player2.move(-1, 0);
 	if (Input.getKey("ArrowRight"))
@@ -27,3 +54,5 @@ function update() {
 	board.player1.update();
 	board.player2.update();
 }
+
+startGame();

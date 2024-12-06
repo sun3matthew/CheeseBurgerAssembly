@@ -3,7 +3,8 @@ import { TextureManager } from './textureManager';
 
 export class ThreeManager{
     constructor( update ) {
-        this.update = update;
+        this.update = () => {}
+        this._update = update;
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -18,6 +19,10 @@ export class ThreeManager{
 
         this.camera.position.set(12, -15, 11);
         this.camera.lookAt(new THREE.Vector3(12, 0, 11));
+    }
+
+    createEmptyBoard(){
+        this.deleteAll();
 
         let light = new THREE.PointLight(0xffffff, 1, 0, 0.5);
         light.position.set(20, -5, 20);
@@ -29,7 +34,7 @@ export class ThreeManager{
         light2.power = 100; 
         this.scene.add(light2);
 
-        let backgroundTexture = TextureManager.ObjectTextures["background"];
+        let backgroundTexture = TextureManager.Textures["background"];
         backgroundTexture.wrapS = THREE.RepeatWrapping;
         backgroundTexture.wrapT = THREE.RepeatWrapping;
         backgroundTexture.repeat.set(10, 10);
@@ -40,5 +45,19 @@ export class ThreeManager{
         ground.rotation.x = -Math.PI / 2;
         ground.position.y = 0.5;
         this.scene.add(ground);
+    }
+
+    pause(){
+        this.update = () => {};
+    }
+
+    start(){
+        this.update = this._update;
+    }
+
+    deleteAll(){
+        while(this.scene.children.length > 0){ 
+            this.scene.remove(this.scene.children[0]); 
+        }
     }
 }

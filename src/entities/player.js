@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { TextureManager } from './textureManager.js';
-import { Collision } from './collision.js';
+import { TextureManager } from '../managers/textureManager.js';
+import { Collision } from '../managers/collision.js';
 
 export class Player{
     static playerWidth = 0.5;
@@ -16,7 +16,7 @@ export class Player{
 
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Player.playerWidth, 0.5, Player.playerHeight),
-            new THREE.MeshPhongMaterial({ map: TextureManager.ObjectTextures["player" + playerNumber] })
+            new THREE.MeshPhongMaterial({ map: TextureManager.Textures["P" + playerNumber] })
         );
         scene.add(this.mesh);
 
@@ -25,26 +25,19 @@ export class Player{
 
     hasCollided(offsetX, offsetY){
         let surroundingTiles = this.board.getTilesAroundPlayer(this);
-        let collided = false;
         let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
 
-        for (let i = 0; i < surroundingTiles.length; i++) {
-            let tile = surroundingTiles[i];
-            let tileBoundingBox = tile.getBoundingBox();
-            if (Collision.AABBIntersect(playerBoundingBox, tileBoundingBox)) {
-                collided = true;
-                break;
-            }
-        }
-
-        // check player collision with other player
+        let allBoundingBoxes = surroundingTiles.map(tile => tile.getBoundingBox());
         let otherPlayer = this.playerNumber === 1 ? this.board.player2 : this.board.player1;
-        let otherPlayerBoundingBox = otherPlayer.getBoundingBox();
-        if (Collision.AABBIntersect(playerBoundingBox, otherPlayerBoundingBox)) {
-            collided = true;
+        allBoundingBoxes.push(otherPlayer.getBoundingBox());
+
+        for (let i = 0; i < allBoundingBoxes.length; i++) {
+            let tileBoundingBox = allBoundingBoxes[i];
+            if (Collision.AABBIntersect(playerBoundingBox, tileBoundingBox))
+                return true;
         }
 
-        return collided;
+        return false;
     }
 
     groundUpperPosition(offsetY){

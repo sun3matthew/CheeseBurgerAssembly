@@ -3,7 +3,6 @@ export class Input {
     static keys = {};
     static Init() {
         document.addEventListener('keydown', (event) => {
-            console.log(event.key);
             Input.keys[event.key] = true; // Set the key as pressed
         }, false);
         document.addEventListener('keyup', (event) => {
@@ -12,5 +11,12 @@ export class Input {
     }
     static getKey(key) {
         return Input.keys[key] || false;
+    }
+    static getKeyDown(key) {
+        if (Input.keys[key]) {
+            Input.keys[key] = false;
+            return true;
+        }
+        return false;
     }
 }

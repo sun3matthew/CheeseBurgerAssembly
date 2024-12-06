@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { TextureManager } from './textureManager.js';
+import { TextureManager } from '../managers/textureManager.js';
 
 export class Tile {
     static tileSize = 1;
@@ -10,11 +10,11 @@ export class Tile {
         this.y = y;
 
         // TODO make this better.
-        let isWall = type === 1;
+        let isSolid = type[1] === 'B';
 
         let scale = 0.5;
         let offset = 0.25;
-        if (isWall) {
+        if (isSolid) {
             scale = 1;
             offset = 0;
         }
@@ -22,7 +22,7 @@ export class Tile {
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(1, 1, scale),
             new THREE.MeshPhongMaterial({
-                map: TextureManager.TileTextures[type - 1],
+                map: TextureManager.Textures[type[1]],
                 flatShading: true,
             })
         );
@@ -31,19 +31,17 @@ export class Tile {
         this.mesh.position.set(x, 0, y + offset);
         scene.add(this.mesh);
 
-        if (!isWall) {
+        if (!isSolid) {
             let brickHalf = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, scale),
                 new THREE.MeshPhongMaterial({
-                    map: TextureManager.TileTextures[0],
+                    map: TextureManager.Textures['B'],
                     flatShading: true,
                 })
             );
             brickHalf.position.set(x, 0, y - offset);
             scene.add(brickHalf);
         }
-
-
     }
 
     // position is bottom left of mesh
