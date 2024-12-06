@@ -1,12 +1,13 @@
 import * as THREE from 'three';
-import { TextureManager } from './textureManager.js';
-import { Levels } from './levels.js';
-import { Player } from './player.js';
-import { Tile } from './tile.js';
+import { TextureManager } from './managers/textureManager.js';
+import { Levels } from './managers/levels.js';
+import { Player } from './entities/player.js';
+import { Tile } from './tiles/tile.js';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
-        let grid = Levels.Levels[level].playerGrid;
+        let grid = Levels.Levels[level];
+
         this.tiles = [];
         this.numRows = grid.length;
         this.numCols = grid[0].length;
@@ -19,31 +20,28 @@ export class Board {
             for (let j = 0; j < grid[i].length; j++) {
                 let posZ = grid.length - i - 1;
                 let entry = grid[i][j];
-                if (entry > 0) {
+                if (entry[0] == 'T') {
                     row.push(new Tile(scene, entry, j, posZ));
                 }else{
                     row.push(undefined);
 
-                    if (entry === -1) {
-                        this.player1 = new Player(scene, this, 1, j, posZ);
-                    }else if (entry === -2) {
-                        this.player2 = new Player(scene, this, 2, j, posZ);
-                    }else if (entry === -3) { // TODO: plate class
+                    let entityType = entry[1];
+
+                    if (entityType === 'P') {
+                        let playerNumber = parseInt(entry[2]);
+                        if (playerNumber === 1) {
+                            this.player1 = new Player(scene, this, 1, j, posZ);
+                        }else if (playerNumber === 2) {
+                            this.player2 = new Player(scene, this, 2, j, posZ);
+                        }
+                    }else if (entityType === 'F') {
                         let plate = new THREE.Mesh(
                             new THREE.BoxGeometry(2, 1, 0.25),
                             new THREE.MeshPhongMaterial({ color: 0xc0ffc0 })
                         );
                         plate.position.set(j, 0, posZ - 0.35);
                         scene.add(plate);
-                    }else if (entry === -4) {
-                        let plate = new THREE.Mesh(
-                            new THREE.BoxGeometry(2, 1, 0.25),
-                            // yellow
-                            new THREE.MeshPhongMaterial({ color: 0xffffc0 })
-                        );
-                        plate.position.set(j, 0, posZ - 0.35);
-                        scene.add(plate);
-                    }else if (entry === -5) {
+                    }else if (entityType === 'R') {
                         // leaver. rectangle at 45 degrees
                         let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
                         geometry.rotateY(Math.PI / 4);
@@ -53,7 +51,7 @@ export class Board {
                         );
                         plate.position.set(j + 0.2, 0, posZ - 0.35);
                         scene.add(plate);
-                    }else if (entry === -6) {
+                    }else if (entityType === 'L') {
                         // leaver. rectangle at 45 degrees
                         let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
                         geometry.rotateY(-Math.PI / 4);
@@ -97,7 +95,7 @@ export class Board {
                 }
                 const geometry = new THREE.BoxGeometry(1, 1, 1);
                 const material = new THREE.MeshPhongMaterial({
-                    map: TextureManager.TileTextures[0],
+                    map: TextureManager.Textures['B'],
                     flatShading: true,
                 });
                 const cube = new THREE.Mesh(geometry, material);

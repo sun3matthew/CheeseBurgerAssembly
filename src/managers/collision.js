@@ -1,5 +1,3 @@
-import * as THREE from 'three';
-
 export class Collision {
     static AABBIntersect(box1, box2) {
         return box1.x < box2.x + box2.width &&
