@@ -23,6 +23,17 @@ export class TextureManager {
         };
 
         TextureManager.Models = {
+            "S": {
+                "path": "../../public/models/mug.glb",
+                // rotation first: RHR - index pointing forward, thumb pointing right
+                "xRotate": Math.PI / 2,
+                "yRotate": 0,
+                "zRotate": 0,
+                // scale second: RHR - index pointing up, thumb pointing right
+                "xScale": 0.1,
+                "yScale": 0.1,
+                "zScale": 0.075
+            },
             "C1": {
                 "path": "../../public/models/cheese.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
@@ -67,7 +78,7 @@ export class TextureManager {
                 "xScale": 0.37,
                 "yScale": 0.093,
                 "zScale": 0.05,
-            },
+            }
         };
 
         for (const key in TextureManager.Textures) {
