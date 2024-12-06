@@ -34,6 +34,17 @@ export class TextureManager {
                 "yScale": 0.1,
                 "zScale": 0.075
             },
+            "P": {
+                "path": "../models/plate.glb",
+                // rotation first: RHR - index pointing forward, thumb pointing right
+                "xRotate": Math.PI / 2,
+                "yRotate": 0,
+                "zRotate": 0,
+                // scale second: RHR - index pointing up, thumb pointing right
+                "xScale": 0.02,
+                "yScale": 0.02,
+                "zScale": 0.01
+            },
             "C1": {
                 "path": "../models/cheese.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
