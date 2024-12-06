@@ -51,7 +51,7 @@ export class TextureManager {
                 "xRotate": Math.PI / 2,
                 "yRotate": 0,
                 "zRotate": 0,
-                // scale second: RHR - index pointing down, thumb pointing right
+                // scale second: RHR - index pointing down, thumb pointing  right
                 "xScale": 0.37,
                 "yScale": 0.093,
                 "zScale": 0.05,
