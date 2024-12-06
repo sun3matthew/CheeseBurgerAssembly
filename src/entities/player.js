@@ -19,6 +19,8 @@ export class Player{
         this.dead = false;
         this.onPlate = false;
 
+        this.onLever = undefined;
+
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Player.playerWidth, 0.5, Player.playerHeight),
             new THREE.MeshPhongMaterial({ map: TextureManager.Textures["P" + playerNumber] })
@@ -42,6 +44,23 @@ export class Player{
         }
 
         return allBoundingBoxes;
+    }
+
+    collidedWithLever(){
+        this.onLever = undefined;
+        
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y - 0.001);
+        let levers = this.board.levers;
+
+        for (let i = 0; i < levers.length; i++) {
+            let lever = levers[i];
+            if (Collision.AABBIntersect(playerBoundingBox, lever.getBoundingBox())) {
+                this.onLever = lever;
+                console.log("collided with lever");
+                break;
+            }
+        }
+
     }
 
     collidedWithPlate(){
@@ -150,6 +169,7 @@ export class Player{
 
     update(){
         this.collidedWithDamageTile();
+        this.collidedWithLever();
 
         this.velY -= 0.01;
         let hasCollided = this.hasCollided(0, this.velY);

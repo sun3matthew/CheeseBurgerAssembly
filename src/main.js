@@ -50,6 +50,8 @@ function update() {
 		board.player2.move(1, 0);
 	if (Input.getKey("ArrowUp"))
 		board.player2.jump();
+	if (Input.getKeyDown("ArrowDown") && board.player2.onLever !== undefined)
+		board.player2.onLever.toggleLever();
 
 	if (Input.getKey("a"))
 		board.player1.move(-1, 0);
@@ -57,6 +59,8 @@ function update() {
 		board.player1.move(1, 0);
 	if (Input.getKey("w"))
 		board.player1.jump();
+	if (Input.getKeyDown("s") && board.player1.onLever !== undefined)
+		board.player1.onLever.toggleLever();
 
 	board.update();
 

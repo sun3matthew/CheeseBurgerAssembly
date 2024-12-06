@@ -6,6 +6,7 @@ import { Plate } from './entities/plate.js';
 import { Tile } from './tiles/tile.js';
 import { DamageTile } from './tiles/damageTile.js';
 import { Block } from './entities/block.js';
+import { Lever } from './entities/lever.js';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
@@ -22,6 +23,8 @@ export class Board {
 
         this.blocks = [];
 
+        this.levers = [];
+
         for (let i = grid.length - 1; i >= 0; i--) {
             let row = [];
             for (let j = 0; j < grid[i].length; j++) {
@@ -29,7 +32,7 @@ export class Board {
                 let entry = grid[i][j];
                 if (entry[0] == 'T') {
                     if (entry[1] == 'B') {
-                        row.push(new Tile(scene, entry, j, posZ));
+                        row.push(new Tile(scene, entry, j, posZ, entry[2]));
                     }else{
                         row.push(new DamageTile(scene, entry, j, posZ));
                     }
@@ -47,26 +50,8 @@ export class Board {
                         }
                     }else if (entityType === 'F') {
                         this.plate = new Plate(scene, j, posZ);
-                    }else if (entityType === 'R') {
-                        // leaver. rectangle at 45 degrees
-                        let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
-                        geometry.rotateY(Math.PI / 4);
-                        let plate = new THREE.Mesh(
-                            geometry,
-                            new THREE.MeshPhongMaterial({ color: 0xf0e0e0 })
-                        );
-                        plate.position.set(j + 0.2, 0, posZ - 0.35);
-                        scene.add(plate);
-                    }else if (entityType === 'L') {
-                        // leaver. rectangle at 45 degrees
-                        let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
-                        geometry.rotateY(-Math.PI / 4);
-                        let plate = new THREE.Mesh(
-                            geometry,
-                            new THREE.MeshPhongMaterial({ color: 0xe0e0f0 })
-                        );
-                        plate.position.set(j - 0.2, 0, posZ - 0.35);
-                        scene.add(plate);
+                    }else if (entityType === 'R' || entityType === 'L') {
+                        this.levers.push(new Lever(scene, j, posZ, entityType, entry[2]));
                     }else if (entityType === 'S') {
                         this.blocks.push(new Block(scene, this, j, posZ));
                     }
@@ -75,6 +60,20 @@ export class Board {
             }
             this.tiles.push(row);
         }
+
+        for (let i = 0; i < this.levers.length; i++) {
+            let lever = this.levers[i];
+            for (let row = 0; row < this.tiles.length; row++) {
+                for (let col = 0; col < this.tiles[row].length; col++) {
+                    let tile = this.tiles[row][col];
+                    if (tile !== undefined && tile.associatedLever === lever.leverID) {
+                        lever.associatedTiles.push(tile);
+                    }
+                }
+            }
+        }
+
+
 
         this.createBorder(scene, 10);
     }
