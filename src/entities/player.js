@@ -60,8 +60,8 @@ export class Player{
                 break;
             }
         }
-
     }
+    
 
     collidedWithPlate(){
         return Collision.AABBIntersect(this.getOffsetBoundingBox(this.x, this.y - 0.001), this.board.plate.getBoundingBox());

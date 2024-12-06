@@ -26,6 +26,11 @@ export class Tile {
 
         this.mesh.position.set(x, 0, y);
         scene.add(this.mesh);
+
+        // if odd
+        if (associatedLever % 2 === 1) {
+            this.toggleTile();
+        }
     }
 
     toggleTile() {
@@ -33,7 +38,7 @@ export class Tile {
         if (this.active)
             this.mesh.material.opacity = 1;
         else
-            this.mesh.material.opacity = 0;
+            this.mesh.material.opacity = 0.5;
     }
 
     // position is bottom left of mesh

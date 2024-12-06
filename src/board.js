@@ -7,6 +7,8 @@ import { Tile } from './tiles/tile.js';
 import { DamageTile } from './tiles/damageTile.js';
 import { Block } from './entities/block.js';
 import { Lever } from './entities/lever.js';
+import { Button } from './entities/button.js';
+import { int } from 'three/webgpu';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
@@ -24,6 +26,7 @@ export class Board {
         this.blocks = [];
 
         this.levers = [];
+        this.buttons = [];
 
         for (let i = grid.length - 1; i >= 0; i--) {
             let row = [];
@@ -52,6 +55,8 @@ export class Board {
                         this.plate = new Plate(scene, j, posZ);
                     }else if (entityType === 'R' || entityType === 'L') {
                         this.levers.push(new Lever(scene, j, posZ, entityType, entry[2]));
+                    }else if (entityType === 'B') {
+                        this.buttons.push(new Button(this, scene, j, posZ, entry[2]));
                     }else if (entityType === 'S') {
                         this.blocks.push(new Block(scene, this, j, posZ));
                     }
@@ -61,13 +66,22 @@ export class Board {
             this.tiles.push(row);
         }
 
+        let interactiveTileToggles = [];
         for (let i = 0; i < this.levers.length; i++) {
-            let lever = this.levers[i];
+            interactiveTileToggles.push(this.levers[i]);
+        }
+        for (let i = 0; i < this.buttons.length; i++) {
+            interactiveTileToggles.push(this.buttons[i]);
+        }
+
+
+        for (let i = 0; i < interactiveTileToggles.length; i++) {
+            let interactiveTileToggle = interactiveTileToggles[i];
             for (let row = 0; row < this.tiles.length; row++) {
                 for (let col = 0; col < this.tiles[row].length; col++) {
                     let tile = this.tiles[row][col];
-                    if (tile !== undefined && tile.associatedLever === lever.leverID) {
-                        lever.associatedTiles.push(tile);
+                    if (tile !== undefined && tile.associatedLever === interactiveTileToggle.leverID) {
+                        interactiveTileToggle.associatedTiles.push(tile);
                     }
                 }
             }
@@ -84,6 +98,10 @@ export class Board {
 
         for (let i = 0; i < this.blocks.length; i++) {
             this.blocks[i].update();
+        }
+
+        for (let i = 0; i < this.buttons.length; i++) {
+            this.buttons[i].update();
         }
     }
 
