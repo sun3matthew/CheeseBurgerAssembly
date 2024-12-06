@@ -8,7 +8,7 @@ export class Player{
     static playerHeight = 1.5;
     static playerSpeed = 0.1;
 
-    static showBoxHelper = true; // for debugging purposes - show 3d model outline
+    static showBoxHelper = false; // for debugging purposes - show 3d model outline
     static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
 
     constructor(scene, board, playerNumber, x, y){

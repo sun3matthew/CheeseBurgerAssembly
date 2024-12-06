@@ -7,7 +7,7 @@ export class Block{
     static blockWidth = 1;
     static blockHeight = 0.75;
 
-    static showBoxHelper = true; // for debugging purposes - show 3d model outline
+    static showBoxHelper = false; // for debugging purposes - show 3d model outline
     static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
 
     constructor(scene, board, x, y){

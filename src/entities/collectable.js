@@ -91,6 +91,7 @@ export class Collectable{
 
     delete(){
         this.mesh.material.opacity = 0;
+        this.model.scale.set(0,0,0);
         this.deleted = true;
     }
 
