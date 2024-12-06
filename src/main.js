@@ -11,7 +11,7 @@ let threeManager;
 let board;
 
 let level = 0;
-let totalLevels = 3;
+let totalLevels = 5;
 
 async function startGame() {
 	await Levels.loadLevels(totalLevels);
@@ -52,6 +52,11 @@ function update() {
 	if (pause)
 		return;
 
+	// when you press r restart
+	if (Input.getKeyDown("r")) {
+		resetLevel();
+		return;
+	}
 
 	if (Input.getKeyDown("Enter")) {
 		nextLevel();

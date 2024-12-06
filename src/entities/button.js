@@ -4,7 +4,7 @@ import { Collision } from '../managers/collision';
 
 export class Button{
     static buttonWidth = 0.5;
-    static buttonHeight = 0.10;
+    static buttonHeight = 0.30;
 
     constructor(board, scene, x, y, leverID){
         this.x = x;
