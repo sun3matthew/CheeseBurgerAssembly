@@ -44,7 +44,23 @@ export class ThreeManager{
         );
         ground.rotation.x = -Math.PI / 2;
         ground.position.y = 0.5;
+
         this.scene.add(ground);
+    }
+
+    turnOffLights(){
+        this.scene.children.forEach(child => {
+            if(child instanceof THREE.PointLight){
+                child.power = 10;
+            }
+        });
+    }
+    turnOnLights(){
+        this.scene.children.forEach(child => {
+            if(child instanceof THREE.PointLight){
+                child.power = 100;
+            }
+        });
     }
 
     pause(){

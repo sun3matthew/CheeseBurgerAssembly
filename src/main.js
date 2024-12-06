@@ -38,7 +38,21 @@ function resetLevel() {
 }
 
 
+let pause = false;
+
 function update() {
+	if (Input.getKeyDown(" ")){
+		pause = !pause;
+		if (pause)
+			threeManager.turnOffLights();
+		else
+			threeManager.turnOnLights();
+	}
+
+	if (pause)
+		return;
+
+
 	if (Input.getKeyDown("Enter")) {
 		nextLevel();
 		return;

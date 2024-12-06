@@ -38,7 +38,7 @@ export class Tile {
         if (this.active)
             this.mesh.material.opacity = 1;
         else
-            this.mesh.material.opacity = 0.5;
+            this.mesh.material.opacity = 0.25;
     }
 
     // position is bottom left of mesh
