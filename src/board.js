@@ -5,6 +5,7 @@ import { Player } from './entities/player.js';
 import { Plate } from './entities/plate.js';
 import { Tile } from './tiles/tile.js';
 import { DamageTile } from './tiles/damageTile.js';
+import { Block } from './entities/block.js';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
@@ -18,6 +19,8 @@ export class Board {
         this.player2 = null;
 
         this.plate = null;
+
+        this.blocks = [];
 
         for (let i = grid.length - 1; i >= 0; i--) {
             let row = [];
@@ -64,7 +67,10 @@ export class Board {
                         );
                         plate.position.set(j - 0.2, 0, posZ - 0.35);
                         scene.add(plate);
+                    }else if (entityType === 'S') {
+                        this.blocks.push(new Block(scene, this, j, posZ));
                     }
+
                 }
             }
             this.tiles.push(row);
@@ -73,9 +79,18 @@ export class Board {
         this.createBorder(scene, 10);
     }
 
-    getTilesAroundPlayer(player){
-        let x = Math.floor(player.x);
-        let y = Math.floor(player.y);
+    update(){
+        this.player1.update();
+        this.player2.update();
+
+        for (let i = 0; i < this.blocks.length; i++) {
+            this.blocks[i].update();
+        }
+    }
+
+    getTilesAroundPlayer(posX, posY) {
+        let x = Math.floor(posX);
+        let y = Math.floor(posY);
         let tiles = [];
         for (let i = -2; i <= 2; i++) {
             for (let j = -2; j <= 2; j++) {

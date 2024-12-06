@@ -17,6 +17,7 @@ export class Player{
         this.speedMultiplier = 1;
 
         this.dead = false;
+        this.onPlate = false;
 
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Player.playerWidth, 0.5, Player.playerHeight),
@@ -28,19 +29,28 @@ export class Player{
     }
 
     getAllBoundingBoxes(){
-        let surroundingTiles = this.board.getTilesAroundPlayer(this);
+        let surroundingTiles = this.board.getTilesAroundPlayer(this.x, this.y);
 
         let allBoundingBoxes = surroundingTiles.map(tile => tile.getBoundingBox());
         let otherPlayer = this.playerNumber === 1 ? this.board.player2 : this.board.player1;
         allBoundingBoxes.push(otherPlayer.getBoundingBox());
         allBoundingBoxes.push(this.board.plate.getBoundingBox());
 
+        for (let i = 0; i < this.board.blocks.length; i++) {
+            let block = this.board.blocks[i];
+            allBoundingBoxes.push(block.getBoundingBox());
+        }
+
         return allBoundingBoxes;
+    }
+
+    collidedWithPlate(){
+        return Collision.AABBIntersect(this.getOffsetBoundingBox(this.x, this.y - 0.001), this.board.plate.getBoundingBox());
     }
 
     collidedWithDamageTile(){
         let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y - 0.001);
-        let surroundingTiles = this.board.getTilesAroundPlayer(this);
+        let surroundingTiles = this.board.getTilesAroundPlayer(this.x, this.y);
 
         this.speedMultiplier = 1;
 
@@ -79,6 +89,20 @@ export class Player{
         }
     }
 
+    collidedWithBlock(offsetX){
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y);
+        let blocks = this.board.blocks;
+
+        for (let i = 0; i < blocks.length; i++) {
+            let block = blocks[i];
+            if (Collision.AABBIntersect(playerBoundingBox, block.getBoundingBox())) {
+                return block;
+            }
+        }
+
+        return undefined;
+    }
+
     hasCollided(offsetX, offsetY){
         let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
         let allBoundingBoxes = this.getAllBoundingBoxes();
@@ -106,6 +130,13 @@ export class Player{
     move(deltaX, deltaY){
         deltaX *= Player.playerSpeed * this.speedMultiplier;
         deltaY *= Player.playerSpeed * this.speedMultiplier;
+
+        let block = this.collidedWithBlock(deltaX);
+        if (block !== undefined) {
+            console.log("pushing block");
+            block.push(deltaX);
+            deltaX /= 2;
+        }
 
         let newX = this.x + deltaX;
         if (!this.hasCollided(deltaX, 0)) {

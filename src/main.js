@@ -11,7 +11,7 @@ let threeManager;
 let board;
 
 let level = 0;
-let totalLevels = 2;
+let totalLevels = 3;
 
 async function startGame() {
 	await Levels.loadLevels(totalLevels);
@@ -23,6 +23,10 @@ async function startGame() {
 function nextLevel() {
 	
 	level++;
+	if (level > totalLevels){
+		console.log("You win!");
+		level = 1;
+	}
 	console.log("Level", level);
 	resetLevel();
 }
@@ -54,11 +58,13 @@ function update() {
 	if (Input.getKey("w"))
 		board.player1.jump();
 
-	board.player1.update();
-	board.player2.update();
+	board.update();
 
 	if (board.player1.dead || board.player2.dead)
 		resetLevel();
+
+	if (board.player1.collidedWithPlate() && board.player2.collidedWithPlate())
+		nextLevel();
 }
 
 startGame();
