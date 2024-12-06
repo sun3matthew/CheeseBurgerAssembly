@@ -8,7 +8,7 @@ import { DamageTile } from './tiles/damageTile.js';
 import { Block } from './entities/block.js';
 import { Lever } from './entities/lever.js';
 import { Button } from './entities/button.js';
-import { int } from 'three/webgpu';
+import { Collectable } from './entities/collectable.js';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
@@ -27,6 +27,10 @@ export class Board {
 
         this.levers = [];
         this.buttons = [];
+        this.collectables = [];
+
+        this.numCollectables1 = 0;
+        this.numCollectables2 = 0;
 
         for (let i = grid.length - 1; i >= 0; i--) {
             let row = [];
@@ -59,6 +63,13 @@ export class Board {
                         this.buttons.push(new Button(this, scene, j, posZ, entry[2]));
                     }else if (entityType === 'S') {
                         this.blocks.push(new Block(scene, this, j, posZ));
+                    }else if (entityType === 'C') {
+                        this.collectables.push(new Collectable(scene, j, posZ, entry[2]));
+                        if (entry[2] == 1) {
+                            this.numCollectables1++;
+                        }else if (entry[2] == 2) {
+                            this.numCollectables2++;
+                        }
                     }
 
                 }
@@ -96,13 +107,12 @@ export class Board {
         this.player1.update();
         this.player2.update();
 
-        for (let i = 0; i < this.blocks.length; i++) {
+        for (let i = 0; i < this.blocks.length; i++)
             this.blocks[i].update();
-        }
-
-        for (let i = 0; i < this.buttons.length; i++) {
+        for (let i = 0; i < this.buttons.length; i++) 
             this.buttons[i].update();
-        }
+        for (let i = 0; i < this.collectables.length; i++) 
+            this.collectables[i].update();
     }
 
     getTilesAroundPlayer(posX, posY) {

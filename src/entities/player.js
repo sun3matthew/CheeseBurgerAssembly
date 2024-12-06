@@ -20,6 +20,7 @@ export class Player{
         this.onPlate = false;
 
         this.onLever = undefined;
+        this.numCollected = 0;
 
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Player.playerWidth, 0.5, Player.playerHeight),
@@ -44,6 +45,24 @@ export class Player{
         }
 
         return allBoundingBoxes;
+    }
+
+    collidedWithCollectable(){
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y);
+        let collectables = this.board.collectables;
+
+        for (let i = 0; i < collectables.length; i++) {
+            let collectable = collectables[i];
+            if (collectable.deleted)
+                continue;
+            if (Collision.AABBIntersect(playerBoundingBox, collectable.getBoundingBox())) {
+                if (collectable.playerID == this.playerNumber){
+                    collectable.delete();
+                    this.numCollected++;
+                }
+                break;
+            }
+        }
     }
 
     collidedWithLever(){
@@ -170,6 +189,7 @@ export class Player{
     update(){
         this.collidedWithDamageTile();
         this.collidedWithLever();
+        this.collidedWithCollectable();
 
         this.velY -= 0.01;
         let hasCollided = this.hasCollided(0, this.velY);

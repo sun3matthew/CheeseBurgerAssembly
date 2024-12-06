@@ -13,6 +13,9 @@ export class TextureManager {
             "W": textureLoader.load('../textures/water.png'),
             "S": textureLoader.load('../textures/wood.png'),
 
+            "C1": textureLoader.load('../textures/veggies.png'),
+            "C2": textureLoader.load('../textures/salami.png'),
+
             "P1": textureLoader.load('../textures/lettuce.png'),
             "P2": textureLoader.load('../textures/bread.png'),
             "background": textureLoader.load('../textures/background.png'),
