@@ -21,12 +21,15 @@ async function startGame() {
 }
 
 function nextLevel() {
-	threeManager.createEmptyBoard();
 	
 	level++;
 	console.log("Level", level);
-	board = new Board(threeManager.scene, level);
+	resetLevel();
+}
 
+function resetLevel() {
+	threeManager.createEmptyBoard();
+	board = new Board(threeManager.scene, level);
 	threeManager.start();
 }
 
@@ -53,6 +56,9 @@ function update() {
 
 	board.player1.update();
 	board.player2.update();
+
+	if (board.player1.dead || board.player2.dead)
+		resetLevel();
 }
 
 startGame();
