@@ -67,7 +67,6 @@ function update() {
 	if (board.player1.dead || board.player2.dead)
 		resetLevel();
 
-	console.log(board.numCollectables1, board.player1.numCollected, board.numCollectables2, board.player2.numCollected);
 	if (board.player1.collidedWithPlate() && board.player2.collidedWithPlate() && board.numCollectables1 === board.player1.numCollected && board.numCollectables2 === board.player2.numCollected)
 		nextLevel();
 }
