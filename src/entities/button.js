@@ -18,7 +18,7 @@ export class Button{
         this.toggle = false;
 
         this.mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(Button.buttonWidth, 1, Button.buttonHeight),
+            new THREE.BoxGeometry(Button.buttonWidth, 0.75, Button.buttonHeight),
             new THREE.MeshPhongMaterial({ 
                 color: LeverColorList.leverColorList[leverID] ,
                 transparent: true,
@@ -35,7 +35,17 @@ export class Button{
         let player1BoundingBox = this.board.player1.getBoundingBox();
         let player2BoundingBox = this.board.player2.getBoundingBox();
 
-        if (Collision.AABBIntersect(boundingBox, player1BoundingBox) || Collision.AABBIntersect(boundingBox, player2BoundingBox)) {
+        let blocks = this.board.blocks;
+        let intersectingWithBlock = false;
+        for (let i = 0; i < blocks.length; i++) {
+            let block = blocks[i];
+            if (Collision.AABBIntersect(boundingBox, block.getBoundingBox())) {
+                intersectingWithBlock = true;
+                break;
+            }
+        }
+
+        if (Collision.AABBIntersect(boundingBox, player1BoundingBox) || Collision.AABBIntersect(boundingBox, player2BoundingBox) || intersectingWithBlock) {
             if (!this.toggle) {
                 this.toggle = true;
                 this.associatedTiles.forEach(tile => tile.toggleTile());
@@ -48,7 +58,7 @@ export class Button{
         }
 
         if (this.toggle)
-            this.mesh.material.opacity = 0;
+            this.mesh.material.opacity = 0.4;
         else
             this.mesh.material.opacity = 1;
     }
