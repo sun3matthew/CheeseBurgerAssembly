@@ -24,7 +24,7 @@ export class TextureManager {
 
         TextureManager.Models = {
             "S": {
-                "path": "../../public/models/mug.glb",
+                "path": "../models/mug.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
                 "xRotate": Math.PI / 2,
                 "yRotate": 0,
@@ -35,7 +35,7 @@ export class TextureManager {
                 "zScale": 0.075
             },
             "C1": {
-                "path": "../../public/models/cheese.glb",
+                "path": "../models/cheese.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
                 "xRotate": Math.PI / -2,
                 "yRotate": 0,
@@ -47,7 +47,7 @@ export class TextureManager {
                 "zScale": 1.75
             },
             "C2": {
-                "path": "../../public/models/meat.glb",
+                "path": "../models/meat.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
                 "xRotate": 0,
                 "yRotate": 0,
@@ -58,7 +58,7 @@ export class TextureManager {
                 "zScale": 0.19
             },
             "P1": {
-                "path": "../../public/models/lettuce.glb",
+                "path": "../models/lettuce.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
                 "xRotate": 0,
                 "yRotate": 0,
@@ -69,7 +69,7 @@ export class TextureManager {
                 "zScale": 8.3
             },
             "P2": {
-                "path": "../../public/models/bread.glb",
+                "path": "../models/bread.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
                 "xRotate": Math.PI / 2,
                 "yRotate": 0,
