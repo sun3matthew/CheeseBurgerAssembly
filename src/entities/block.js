@@ -1,10 +1,14 @@
 import * as THREE from 'three';
 import { TextureManager } from '../managers/textureManager.js';
 import { Collision } from '../managers/collision.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export class Block{
     static blockWidth = 1;
     static blockHeight = 0.75;
+
+    static showBoxHelper = false; // for debugging purposes - show 3d model outline
+    static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
 
     constructor(scene, board, x, y){
         this.x = x;
@@ -18,7 +22,58 @@ export class Block{
             new THREE.BoxGeometry(Block.blockWidth, 1, Block.blockHeight),
             new THREE.MeshPhongMaterial({ map: TextureManager.Textures["S"] })
         );
-        scene.add(this.mesh);
+
+        this.model = new THREE.Group();
+        this.boxHelper = new THREE.BoxHelper();
+
+        const modelInfo = TextureManager.Models["S"];
+        const loader = new GLTFLoader();
+        loader.load(
+            modelInfo["path"], // Path to GLB file
+            (gltf) => {
+                const model = gltf.scene; // imported 3D model
+
+                // Calculate the bounding box and center the model
+                const model_box = new THREE.Box3().setFromObject(model); // Calculate bounding box
+                const model_center = model_box.getCenter(new THREE.Vector3()); // Get the center of the box
+                model.position.sub(model_center); // Reposition the model so its center is at (0, 0, 0)
+
+                // Create a pivot group which will act as the model
+                this.model = new THREE.Group();
+                this.model.add(model);
+
+                // Add the pivot group to the scene
+                scene.add(this.model);
+
+                // Help visualize and resize 
+                if(Block.showBoxHelper) {
+                    this.boxHelper = new THREE.BoxHelper(this.model, 0xff0000); // Red color for the outline
+                    scene.add(this.boxHelper);
+                }
+
+                // Rotate and scale the model around its center
+                this.model.rotation.x = modelInfo["xRotate"]; 
+                this.model.rotation.y = modelInfo["yRotate"]; 
+                this.model.rotation.z = modelInfo["zRotate"]; 
+                this.model.scale.set(modelInfo["xScale"], modelInfo["yScale"], modelInfo["zScale"]); 
+                if (Block.showBoxHelper) {
+                    this.boxHelper.update();
+                }
+            },
+            (xhr) => {
+                //console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                if (xhr.loaded / xhr.total * 100 == 100) {
+                    console.log("Done Loading Block");
+                }
+            },
+            (error) => {
+                console.error('An error occurred while loading the GLTF model', error);
+            }
+        );
+
+        if (Block.showBasicMesh) {
+            scene.add(this.mesh);
+        }
 
         this.mesh.position.set(this.x, 0, this.y);
     }
@@ -100,9 +155,9 @@ export class Block{
         if (this.velY < 0) {
             if (hasCollided) {
                 let groundUpperPosition = this.collisionUpperPosition(this.velY);
-                if (groundUpperPosition !== undefined)
+                if (groundUpperPosition !== undefined) {
                     this.updatePosition(this.x, groundUpperPosition + Block.blockHeight / 2);
-                
+                }
                 this.velY = 0;
                 this.grounded = true;
             }else{
@@ -148,5 +203,9 @@ export class Block{
         this.x = x;
         this.y = y;
         this.mesh.position.set(x, 0, y);
+        this.model.position.set(x, 0, y);
+        if (Block.showBoxHelper) {
+            this.boxHelper.update();
+        }
     }
 }
