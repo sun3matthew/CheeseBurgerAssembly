@@ -5,6 +5,10 @@ import { Player } from './entities/player.js';
 import { Plate } from './entities/plate.js';
 import { Tile } from './tiles/tile.js';
 import { DamageTile } from './tiles/damageTile.js';
+import { Block } from './entities/block.js';
+import { Lever } from './entities/lever.js';
+import { Button } from './entities/button.js';
+import { Collectable } from './entities/collectable.js';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
@@ -19,6 +23,15 @@ export class Board {
 
         this.plate = null;
 
+        this.blocks = [];
+
+        this.levers = [];
+        this.buttons = [];
+        this.collectables = [];
+
+        this.numCollectables1 = 0;
+        this.numCollectables2 = 0;
+
         for (let i = grid.length - 1; i >= 0; i--) {
             let row = [];
             for (let j = 0; j < grid[i].length; j++) {
@@ -26,7 +39,7 @@ export class Board {
                 let entry = grid[i][j];
                 if (entry[0] == 'T') {
                     if (entry[1] == 'B') {
-                        row.push(new Tile(scene, entry, j, posZ));
+                        row.push(new Tile(scene, entry, j, posZ, entry[2]));
                     }else{
                         row.push(new DamageTile(scene, entry, j, posZ));
                     }
@@ -44,38 +57,67 @@ export class Board {
                         }
                     }else if (entityType === 'F') {
                         this.plate = new Plate(scene, j, posZ);
-                    }else if (entityType === 'R') {
-                        // leaver. rectangle at 45 degrees
-                        let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
-                        geometry.rotateY(Math.PI / 4);
-                        let plate = new THREE.Mesh(
-                            geometry,
-                            new THREE.MeshPhongMaterial({ color: 0xf0e0e0 })
-                        );
-                        plate.position.set(j + 0.2, 0, posZ - 0.35);
-                        scene.add(plate);
-                    }else if (entityType === 'L') {
-                        // leaver. rectangle at 45 degrees
-                        let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);
-                        geometry.rotateY(-Math.PI / 4);
-                        let plate = new THREE.Mesh(
-                            geometry,
-                            new THREE.MeshPhongMaterial({ color: 0xe0e0f0 })
-                        );
-                        plate.position.set(j - 0.2, 0, posZ - 0.35);
-                        scene.add(plate);
+                    }else if (entityType === 'R' || entityType === 'L') {
+                        this.levers.push(new Lever(scene, j, posZ, entityType, entry[2]));
+                    }else if (entityType === 'B') {
+                        this.buttons.push(new Button(this, scene, j, posZ, entry[2]));
+                    }else if (entityType === 'S') {
+                        this.blocks.push(new Block(scene, this, j, posZ));
+                    }else if (entityType === 'C') {
+                        this.collectables.push(new Collectable(scene, j, posZ, entry[2]));
+                        if (entry[2] == 1) {
+                            this.numCollectables1++;
+                        }else if (entry[2] == 2) {
+                            this.numCollectables2++;
+                        }
                     }
+
                 }
             }
             this.tiles.push(row);
         }
 
+        let interactiveTileToggles = [];
+        for (let i = 0; i < this.levers.length; i++) {
+            interactiveTileToggles.push(this.levers[i]);
+        }
+        for (let i = 0; i < this.buttons.length; i++) {
+            interactiveTileToggles.push(this.buttons[i]);
+        }
+
+
+        for (let i = 0; i < interactiveTileToggles.length; i++) {
+            let interactiveTileToggle = interactiveTileToggles[i];
+            for (let row = 0; row < this.tiles.length; row++) {
+                for (let col = 0; col < this.tiles[row].length; col++) {
+                    let tile = this.tiles[row][col];
+                    if (tile !== undefined && tile.associatedLever === interactiveTileToggle.leverID) {
+                        interactiveTileToggle.associatedTiles.push(tile);
+                    }
+                }
+            }
+        }
+
+
+
         this.createBorder(scene, 10);
     }
 
-    getTilesAroundPlayer(player){
-        let x = Math.floor(player.x);
-        let y = Math.floor(player.y);
+    update(){
+        this.player1.update();
+        this.player2.update();
+
+        for (let i = 0; i < this.blocks.length; i++)
+            this.blocks[i].update();
+        for (let i = 0; i < this.buttons.length; i++) 
+            this.buttons[i].update();
+        for (let i = 0; i < this.collectables.length; i++) 
+            this.collectables[i].update();
+    }
+
+    getTilesAroundPlayer(posX, posY) {
+        let x = Math.floor(posX);
+        let y = Math.floor(posY);
         let tiles = [];
         for (let i = -2; i <= 2; i++) {
             for (let j = -2; j <= 2; j++) {

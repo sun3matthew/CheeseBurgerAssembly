@@ -17,6 +17,10 @@ export class Player{
         this.speedMultiplier = 1;
 
         this.dead = false;
+        this.onPlate = false;
+
+        this.onLever = undefined;
+        this.numCollected = 0;
 
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Player.playerWidth, 0.5, Player.playerHeight),
@@ -28,19 +32,63 @@ export class Player{
     }
 
     getAllBoundingBoxes(){
-        let surroundingTiles = this.board.getTilesAroundPlayer(this);
+        let surroundingTiles = this.board.getTilesAroundPlayer(this.x, this.y);
 
         let allBoundingBoxes = surroundingTiles.map(tile => tile.getBoundingBox());
         let otherPlayer = this.playerNumber === 1 ? this.board.player2 : this.board.player1;
         allBoundingBoxes.push(otherPlayer.getBoundingBox());
         allBoundingBoxes.push(this.board.plate.getBoundingBox());
 
+        for (let i = 0; i < this.board.blocks.length; i++) {
+            let block = this.board.blocks[i];
+            allBoundingBoxes.push(block.getBoundingBox());
+        }
+
         return allBoundingBoxes;
+    }
+
+    collidedWithCollectable(){
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y);
+        let collectables = this.board.collectables;
+
+        for (let i = 0; i < collectables.length; i++) {
+            let collectable = collectables[i];
+            if (collectable.deleted)
+                continue;
+            if (Collision.AABBIntersect(playerBoundingBox, collectable.getBoundingBox())) {
+                if (collectable.playerID == this.playerNumber){
+                    collectable.delete();
+                    this.numCollected++;
+                }
+                break;
+            }
+        }
+    }
+
+    collidedWithLever(){
+        this.onLever = undefined;
+        
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y - 0.001);
+        let levers = this.board.levers;
+
+        for (let i = 0; i < levers.length; i++) {
+            let lever = levers[i];
+            if (Collision.AABBIntersect(playerBoundingBox, lever.getBoundingBox())) {
+                this.onLever = lever;
+                console.log("collided with lever");
+                break;
+            }
+        }
+    }
+    
+
+    collidedWithPlate(){
+        return Collision.AABBIntersect(this.getOffsetBoundingBox(this.x, this.y - 0.001), this.board.plate.getBoundingBox());
     }
 
     collidedWithDamageTile(){
         let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y - 0.001);
-        let surroundingTiles = this.board.getTilesAroundPlayer(this);
+        let surroundingTiles = this.board.getTilesAroundPlayer(this.x, this.y);
 
         this.speedMultiplier = 1;
 
@@ -79,6 +127,20 @@ export class Player{
         }
     }
 
+    collidedWithBlock(offsetX){
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y);
+        let blocks = this.board.blocks;
+
+        for (let i = 0; i < blocks.length; i++) {
+            let block = blocks[i];
+            if (Collision.AABBIntersect(playerBoundingBox, block.getBoundingBox())) {
+                return block;
+            }
+        }
+
+        return undefined;
+    }
+
     hasCollided(offsetX, offsetY){
         let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
         let allBoundingBoxes = this.getAllBoundingBoxes();
@@ -107,6 +169,13 @@ export class Player{
         deltaX *= Player.playerSpeed * this.speedMultiplier;
         deltaY *= Player.playerSpeed * this.speedMultiplier;
 
+        let block = this.collidedWithBlock(deltaX);
+        if (block !== undefined) {
+            console.log("pushing block");
+            block.push(deltaX);
+            deltaX /= 2;
+        }
+
         let newX = this.x + deltaX;
         if (!this.hasCollided(deltaX, 0)) {
             this.updatePosition(newX, this.y);
@@ -119,6 +188,8 @@ export class Player{
 
     update(){
         this.collidedWithDamageTile();
+        this.collidedWithLever();
+        this.collidedWithCollectable();
 
         this.velY -= 0.01;
         let hasCollided = this.hasCollided(0, this.velY);

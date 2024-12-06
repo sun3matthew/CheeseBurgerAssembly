@@ -11,6 +11,10 @@ export class TextureManager {
             "O": textureLoader.load('../textures/oil.png'),
             "G": textureLoader.load('../textures/grill.png'),
             "W": textureLoader.load('../textures/water.png'),
+            "S": textureLoader.load('../textures/wood.png'),
+
+            "C1": textureLoader.load('../textures/veggies.png'),
+            "C2": textureLoader.load('../textures/salami.png'),
 
             "P1": textureLoader.load('../textures/lettuce.png'),
             "P2": textureLoader.load('../textures/bread.png'),

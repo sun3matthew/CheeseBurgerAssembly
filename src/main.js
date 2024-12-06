@@ -11,7 +11,7 @@ let threeManager;
 let board;
 
 let level = 0;
-let totalLevels = 2;
+let totalLevels = 3;
 
 async function startGame() {
 	await Levels.loadLevels(totalLevels);
@@ -23,6 +23,10 @@ async function startGame() {
 function nextLevel() {
 	
 	level++;
+	if (level > totalLevels){
+		console.log("You win!");
+		level = 1;
+	}
 	console.log("Level", level);
 	resetLevel();
 }
@@ -46,6 +50,8 @@ function update() {
 		board.player2.move(1, 0);
 	if (Input.getKey("ArrowUp"))
 		board.player2.jump();
+	if (Input.getKeyDown("ArrowDown") && board.player2.onLever !== undefined)
+		board.player2.onLever.toggleLever();
 
 	if (Input.getKey("a"))
 		board.player1.move(-1, 0);
@@ -53,12 +59,17 @@ function update() {
 		board.player1.move(1, 0);
 	if (Input.getKey("w"))
 		board.player1.jump();
+	if (Input.getKeyDown("s") && board.player1.onLever !== undefined)
+		board.player1.onLever.toggleLever();
 
-	board.player1.update();
-	board.player2.update();
+	board.update();
 
 	if (board.player1.dead || board.player2.dead)
 		resetLevel();
+
+	console.log(board.numCollectables1, board.player1.numCollected, board.numCollectables2, board.player2.numCollected);
+	if (board.player1.collidedWithPlate() && board.player2.collidedWithPlate() && board.numCollectables1 === board.player1.numCollected && board.numCollectables2 === board.player2.numCollected)
+		nextLevel();
 }
 
 startGame();

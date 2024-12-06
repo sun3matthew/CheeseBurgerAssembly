@@ -23,3 +23,5 @@ List of entities:
 - `ES0` - Movable Solid Block
 - `EBx` - Button, where `x` is the button number
 - `ECx` - Collectable, where `x` is the player it is for.
+
+For levers and tiles, if x is even, the tiles start open, if x is odd, the tiles start closed.
