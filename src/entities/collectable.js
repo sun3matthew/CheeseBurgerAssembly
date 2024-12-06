@@ -98,7 +98,12 @@ export class Collectable{
         // rotate the collectible + 3d model
         this.currentRotation += Collectable.spinRate;
         this.mesh.rotation.z = this.currentRotation;
-        this.model.rotation.y = this.currentRotation;
+        if (this.playerID==1) {
+            this.model.rotation.y = -this.currentRotation;
+        } else {
+            this.model.rotation.z = this.currentRotation;
+        }
+        
         // hover the collectible + 3d model
         this.currentHover += Collectable.hoverRate;
         let deltaHover = Collectable.hoverRange*Math.sin(this.currentHover)+Collectable.hoverRange;
