@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { TextureManager } from './managers/textureManager.js';
 import { Levels } from './managers/levels.js';
 import { Player } from './entities/player.js';
+import { Plate } from './entities/plate.js';
 import { Tile } from './tiles/tile.js';
+import { DamageTile } from './tiles/damageTile.js';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
@@ -15,13 +17,19 @@ export class Board {
         this.player1 = null;
         this.player2 = null;
 
+        this.plate = null;
+
         for (let i = grid.length - 1; i >= 0; i--) {
             let row = [];
             for (let j = 0; j < grid[i].length; j++) {
                 let posZ = grid.length - i - 1;
                 let entry = grid[i][j];
                 if (entry[0] == 'T') {
-                    row.push(new Tile(scene, entry, j, posZ));
+                    if (entry[1] == 'B') {
+                        row.push(new Tile(scene, entry, j, posZ));
+                    }else{
+                        row.push(new DamageTile(scene, entry, j, posZ));
+                    }
                 }else{
                     row.push(undefined);
 
@@ -35,12 +43,7 @@ export class Board {
                             this.player2 = new Player(scene, this, 2, j, posZ);
                         }
                     }else if (entityType === 'F') {
-                        let plate = new THREE.Mesh(
-                            new THREE.BoxGeometry(2, 1, 0.25),
-                            new THREE.MeshPhongMaterial({ color: 0xc0ffc0 })
-                        );
-                        plate.position.set(j, 0, posZ - 0.35);
-                        scene.add(plate);
+                        this.plate = new Plate(scene, j, posZ);
                     }else if (entityType === 'R') {
                         // leaver. rectangle at 45 degrees
                         let geometry = new THREE.BoxGeometry(1.5, 0.5, 0.25);

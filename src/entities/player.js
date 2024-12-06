@@ -14,6 +14,10 @@ export class Player{
         this.velY = 0;
         this.grounded = false;
 
+        this.speedMultiplier = 1;
+
+        this.dead = false;
+
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Player.playerWidth, 0.5, Player.playerHeight),
             new THREE.MeshPhongMaterial({ map: TextureManager.Textures["P" + playerNumber] })
@@ -23,38 +27,85 @@ export class Player{
         this.updatePosition(x, y - 0.5 + (Player.playerHeight / 2));
     }
 
-    hasCollided(offsetX, offsetY){
+    getAllBoundingBoxes(){
         let surroundingTiles = this.board.getTilesAroundPlayer(this);
-        let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
 
         let allBoundingBoxes = surroundingTiles.map(tile => tile.getBoundingBox());
         let otherPlayer = this.playerNumber === 1 ? this.board.player2 : this.board.player1;
         allBoundingBoxes.push(otherPlayer.getBoundingBox());
+        allBoundingBoxes.push(this.board.plate.getBoundingBox());
+
+        return allBoundingBoxes;
+    }
+
+    collidedWithDamageTile(){
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y - 0.001);
+        let surroundingTiles = this.board.getTilesAroundPlayer(this);
+
+        this.speedMultiplier = 1;
+
+        for (let i = 0; i < surroundingTiles.length; i++) {
+            let tile = surroundingTiles[i];
+            if (tile.getDamageBoundingBox !== undefined) {
+                let damageBoundingBox = tile.getDamageBoundingBox();
+                if (Collision.AABBIntersect(playerBoundingBox, damageBoundingBox)) {
+                    let stillColliding = true;
+                    if (tile.damageType !== 2) {
+                        // recheck if player is still colliding with damage tile if not grill
+
+                        stillColliding = false;
+                        let basePlayerBoundingBox = this.getOffsetBoundingBox(this.x, this.y);
+                        if (Collision.AABBIntersect(basePlayerBoundingBox, damageBoundingBox)) {
+                            stillColliding = true;
+                        }
+                    }
+
+                    if (tile.damageType === 1 && stillColliding)
+                        this.speedMultiplier = 0.5;
+
+
+                    if (stillColliding){
+                        if (tile.damageType === 0) {
+                            this.dead = true;
+                        }else if (tile.damageType === 1 && this.playerNumber === 2) {
+                            this.dead = true;
+                        }else if (tile.damageType === 2 && this.playerNumber === 1) {
+                            this.dead = true;
+                        }
+                    }
+                    // break;
+                }
+            }
+        }
+    }
+
+    hasCollided(offsetX, offsetY){
+        let playerBoundingBox = this.getOffsetBoundingBox(this.x + offsetX, this.y + offsetY);
+        let allBoundingBoxes = this.getAllBoundingBoxes();
 
         for (let i = 0; i < allBoundingBoxes.length; i++) {
-            let tileBoundingBox = allBoundingBoxes[i];
-            if (Collision.AABBIntersect(playerBoundingBox, tileBoundingBox))
+            let boundingBoxes = allBoundingBoxes[i];
+            if (Collision.AABBIntersect(playerBoundingBox, boundingBoxes))
                 return true;
         }
 
         return false;
     }
 
-    groundUpperPosition(offsetY){
-        let surroundingTiles = this.board.getTilesAroundPlayer(this);
+    collisionUpperPosition(offsetY){
         let playerBoundingBox = this.getOffsetBoundingBox(this.x, this.y + offsetY);
+        let allBoundingBoxes = this.getAllBoundingBoxes();
 
-        for (let i = 0; i < surroundingTiles.length; i++) {
-            let tile = surroundingTiles[i];
-            let tileBoundingBox = tile.getBoundingBox();
-            if (Collision.AABBIntersect(playerBoundingBox, tileBoundingBox))
-                return tileBoundingBox.y + tileBoundingBox.height;
+        for (let i = 0; i < allBoundingBoxes.length; i++) {
+            let boundingBoxes = allBoundingBoxes[i];
+            if (Collision.AABBIntersect(playerBoundingBox, boundingBoxes))
+                return boundingBoxes.y + boundingBoxes.height;
         }
     }
 
     move(deltaX, deltaY){
-        deltaX *= Player.playerSpeed;
-        deltaY *= Player.playerSpeed;
+        deltaX *= Player.playerSpeed * this.speedMultiplier;
+        deltaY *= Player.playerSpeed * this.speedMultiplier;
 
         let newX = this.x + deltaX;
         if (!this.hasCollided(deltaX, 0)) {
@@ -67,12 +118,14 @@ export class Player{
     }
 
     update(){
+        this.collidedWithDamageTile();
+
         this.velY -= 0.01;
         let hasCollided = this.hasCollided(0, this.velY);
         // check if player is on the ground
         if (this.velY < 0) {
             if (hasCollided) {
-                let groundUpperPosition = this.groundUpperPosition(this.velY);
+                let groundUpperPosition = this.collisionUpperPosition(this.velY);
                 if (groundUpperPosition !== undefined)
                     this.updatePosition(this.x, groundUpperPosition + Player.playerHeight / 2);
                 
