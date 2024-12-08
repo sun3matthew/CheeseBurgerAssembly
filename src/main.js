@@ -3,6 +3,8 @@ import { TextureManager } from './managers/textureManager';
 import { ThreeManager } from './managers/threeManager';
 import { Board } from './board';
 import { Levels } from './managers/levels';
+import { Audio } from './managers/audio.js';
+import * as THREE from 'three';
 
 Input.Init();
 TextureManager.Init();
@@ -12,6 +14,19 @@ let board;
 
 let level = 0;
 let totalLevels = 3;
+
+const listener = new THREE.AudioListener();
+const loader = new THREE.AudioLoader();
+const sound = new THREE.Audio(listener);
+loader.load(
+	'../public/audio/background.mp3',
+	(buffer) => {
+		sound.setBuffer(buffer);
+		sound.setLoop(true); 
+		sound.setVolume(1);
+	}
+)
+sound.play();
 
 async function startGame() {
 	await Levels.loadLevels(totalLevels);
@@ -81,8 +96,18 @@ function update() {
 	if (board.player1.dead || board.player2.dead)
 		resetLevel();
 
-	if (board.player1.collidedWithPlate() && board.player2.collidedWithPlate() && board.numCollectables1 === board.player1.numCollected && board.numCollectables2 === board.player2.numCollected)
+	if (board.player1.collidedWithPlate() && board.player2.collidedWithPlate() && board.numCollectables1 === board.player1.numCollected && board.numCollectables2 === board.player2.numCollected) {
+		//console.log("won");
+		// let sound = new Audio("./audio/levelUp.mp3", false);
+		// const sourceNode = sound.getSound().source; // Access the AudioBufferSourceNode
+    	// sourceNode.onended = () => {
+		// 	console.log('First audio finished, playing second audio...');
+		// 	//sound.play();
+    	// };
+		// sound.play();
+
 		nextLevel();
+	}
 }
 
 startGame();

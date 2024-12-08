@@ -9,6 +9,7 @@ import { Block } from './entities/block.js';
 import { Lever } from './entities/lever.js';
 import { Button } from './entities/button.js';
 import { Collectable } from './entities/collectable.js';
+import { Audio } from './managers/audio.js';
 
 export class Board {
     constructor(scene, level) { // level is 1, 2, 3..
@@ -101,6 +102,9 @@ export class Board {
 
 
         this.createBorder(scene, 10);
+
+        this.background = new Audio("./audio/background.mp3", true);
+        this.background.play();
     }
 
     update(){

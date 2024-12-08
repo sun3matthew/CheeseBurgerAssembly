@@ -2,12 +2,15 @@ import * as THREE from 'three';
 import { LeverColorList } from '../managers/leverColorList';
 import { TextureManager } from '../managers/textureManager.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Audio } from '../managers/audio.js';
 
 export class Lever{
     static leverBoundingBoxWidth = 1;
     static leverBoundingBoxHeight = 1.5;
 
     static leverAngle = Math.PI / 2.6;
+
+    static flipSound = '../audio/lever.mp3';
 
     static showBoxHelper = false; // for debugging purposes - show 3d model outline
     static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
@@ -24,6 +27,8 @@ export class Lever{
         this.yOffsetModel= -0.2;
         this.xOffset = 0.35; // positive = brings closer to wall
         this.yOffset = this.yOffsetModel - 0.2;
+
+        this.sound = new Audio(Lever.flipSound, false);
 
         this.lever = new THREE.Mesh(
             new THREE.BoxGeometry(2, 0.35, 0.35),
@@ -102,6 +107,7 @@ export class Lever{
     }
 
     toggleLever(){
+        this.sound.play();
         this.toggle = !this.toggle;
         let modelInfo = TextureManager.Models["L"];
         if (this.toggle){ // flip the lever down

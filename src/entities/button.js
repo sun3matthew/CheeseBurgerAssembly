@@ -3,10 +3,14 @@ import { LeverColorList } from '../managers/leverColorList';
 import { Collision } from '../managers/collision';
 import { TextureManager } from '../managers/textureManager.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Audio } from '../managers/audio.js';
 
 export class Button{
     static buttonWidth = 0.5;
     static buttonHeight = 0.10;
+
+    static clickSound = '../audio/click.mp3';
+    static unclickSound = '../audio/unClick.mp3';
 
     static showBoxHelper = false; // for debugging purposes - show 3d model outline
     static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
@@ -23,6 +27,9 @@ export class Button{
         this.associatedTiles = [];
 
         this.toggle = false;
+
+        this.clickSound = new Audio(Button.clickSound, false);
+        this.unclickSound = new Audio(Button.unclickSound, false);
 
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Button.buttonWidth, 0.75, Button.buttonHeight),
@@ -155,11 +162,13 @@ export class Button{
 
         if (Collision.AABBIntersect(boundingBox, player1BoundingBox) || Collision.AABBIntersect(boundingBox, player2BoundingBox) || intersectingWithBlock) {
             if (!this.toggle) {
+                this.clickSound.play();
                 this.toggle = true;
                 this.associatedTiles.forEach(tile => tile.toggleTile());
             }
         } else {
             if (this.toggle) {
+                this.unclickSound.play();
                 this.toggle = false;
                 this.associatedTiles.forEach(tile => tile.toggleTile());
             }
