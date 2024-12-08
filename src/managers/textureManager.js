@@ -23,6 +23,17 @@ export class TextureManager {
         };
 
         TextureManager.Models = {
+            "L": {
+                "path": "../models/levers/lever", // not a complete path, up to user to finish path name
+                // rotation first: RHR - index pointing forward, thumb pointing right
+                "xRotate": Math.PI / 2,
+                "yRotate": Math.PI / -2,
+                "zRotate": 0,
+                // scale second: RHR - index pointing up, thumb pointing you
+                "xScale": 5,
+                "yScale": 5,
+                "zScale": 5
+            },
             "S": {
                 "path": "../models/mug.glb",
                 // rotation first: RHR - index pointing forward, thumb pointing right
