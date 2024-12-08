@@ -15,19 +15,6 @@ let board;
 let level = 0;
 let totalLevels = 5;
 
-const listener = new THREE.AudioListener();
-const loader = new THREE.AudioLoader();
-const sound = new THREE.Audio(listener);
-loader.load(
-	'../public/audio/background.mp3',
-	(buffer) => {
-		sound.setBuffer(buffer);
-		sound.setLoop(true); 
-		sound.setVolume(1);
-	}
-)
-sound.play();
-
 async function startGame() {
 	await Levels.loadLevels(totalLevels);
 	
@@ -55,6 +42,11 @@ function resetLevel() {
 
 let pause = false;
 
+const audioElement = document.createElement('audio');
+audioElement.src = '../audio/background.mp3';
+audioElement.loop = true; // Set to true if you want the audio to loop
+audioElement.play(); // Start playing the audio
+
 function update() {
 	if (Input.getKeyDown(" ")){
 		pause = !pause;
@@ -66,6 +58,7 @@ function update() {
 
 	if (pause)
 		return;
+
 
 	// when you press r restart
 	if (Input.getKeyDown("r")) {

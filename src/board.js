@@ -99,12 +99,7 @@ export class Board {
             }
         }
 
-
-
         this.createBorder(scene, 10);
-
-        this.background = new Audio("./audio/background.mp3", true);
-        this.background.play();
     }
 
     update(){
