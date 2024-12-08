@@ -9,7 +9,7 @@ export class Button{
     static buttonHeight = 0.10;
 
     static showBoxHelper = false; // for debugging purposes - show 3d model outline
-    static showBasicMesh = true; // for debuggin purposes - show original basic 3d mesh
+    static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
 
     constructor(board, scene, x, y, leverID){
         this.x = x;
