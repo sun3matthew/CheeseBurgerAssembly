@@ -2,11 +2,14 @@ import * as THREE from 'three';
 import { TextureManager } from '../managers/textureManager.js';
 import { Collision } from '../managers/collision.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Audio } from '../managers/audio.js';
 
 export class Player{
     static playerWidth = 0.5;
     static playerHeight = 1.5;
     static playerSpeed = 0.1;
+
+    static deathSound = '../audio/death.mp3';
 
     static showBoxHelper = false; // for debugging purposes - show 3d model outline
     static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
@@ -25,6 +28,8 @@ export class Player{
 
         this.onLever = undefined;
         this.numCollected = 0;
+
+        this.sound = new Audio(Player.deathSound, false);
 
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Player.playerWidth, 0.5, Player.playerHeight),
@@ -169,10 +174,13 @@ export class Player{
 
                     if (stillColliding){
                         if (tile.damageType === 0) {
+                            this.sound.play();
                             this.dead = true;
-                        }else if (tile.damageType === 1 && this.playerNumber === 2) {
+                        } else if (tile.damageType === 1 && this.playerNumber === 2) { // bread touches water
+                            this.sound.play();
                             this.dead = true;
-                        }else if (tile.damageType === 2 && this.playerNumber === 1) {
+                        } else if (tile.damageType === 2 && this.playerNumber === 1) { // lettuce touches grill
+                            this.sound.play();
                             this.dead = true;
                         }
                     }

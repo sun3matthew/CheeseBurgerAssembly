@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { TextureManager } from '../managers/textureManager';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Audio } from '../managers/audio.js';
 
 export class Collectable{
     static collectableWidth = 0.5;
@@ -9,6 +10,8 @@ export class Collectable{
     static spinRate = 0.04;
     static hoverRate = 0.02;
     static hoverRange = 0.3;
+
+    static collectSound = '../audio/collect.mp3';
 
     static showBoxHelper = false; // for debugging purposes - show 3d model outline
     static showBasicMesh = false; // for debuggin purposes - show original basic 3d mesh
@@ -23,7 +26,7 @@ export class Collectable{
 
         this.deleted = false;
 
-        
+        this.sound = new Audio(Collectable.collectSound, false);
 
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(Collectable.collectableWidth, Collectable.collectableWidth, Collectable.collectableHeight),
@@ -90,6 +93,7 @@ export class Collectable{
     }
 
     delete(){
+        this.sound.play();
         this.mesh.material.opacity = 0;
         this.model.scale.set(0,0,0);
         this.deleted = true;

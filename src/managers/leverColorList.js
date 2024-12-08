@@ -12,5 +12,4 @@ export class LeverColorList{
         0x34495e, // Wet Asphalt
         0x95a5a6  // Concrete
     ];
-    
 }
