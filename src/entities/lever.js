@@ -41,6 +41,10 @@ export class Lever{
             this.xOffsetModel = -this.xOffsetModel;
             this.lever.rotateY(-Lever.leverAngle);
         }
+
+        this.model = new THREE.Group();
+        this.boxHelper = new THREE.BoxHelper();
+
         const modelInfo = TextureManager.Models["L"];
         const loader = new GLTFLoader();
         loader.load(
@@ -83,7 +87,7 @@ export class Lever{
             (xhr) => {
                 //console.log((xhr.loaded / xhr.total * 100) + '% loaded');
                 if (xhr.loaded / xhr.total * 100 == 100) {
-                    console.log("Done Loading Plate");
+                    console.log("Done Loading Lever" + this.leverID);
                 }
             },
             (error) => {
