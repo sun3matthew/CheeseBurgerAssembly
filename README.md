@@ -9,7 +9,7 @@ Derived from the game Fireboy and Watergirl.
 
 clone with
 ```
-git clone https://github.com/sun3matthew/FireBoyWaterGirl.git
+git clone https://github.com/sun3matthew/CheeseBurgerAssembly.git
 ```
 
 install dependencies with
